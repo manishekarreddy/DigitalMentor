@@ -1,0 +1,53 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.4'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.digitalmentor'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	//spring-boot-starter-security
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.3.3'
+	// https://mvnrepository.com/artifact/org.projectlombok/lombok
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.34'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '3.3.4'
+	// https://mvnrepository.com/artifact/org.postgresql/postgresql
+	implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
+	// JJWT API
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+
+	// JJWT implementation
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+
+	// JJWT Jackson serialization support
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.3.3'
+
+
+
+
+
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
