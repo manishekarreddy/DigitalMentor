@@ -16,13 +16,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
-
-
-    @Autowired
-    private MyUserDetailsService userDetailsService;
 
 
     // Configure the password encoder
@@ -37,6 +34,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomException.CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
 
     // AuthenticationManager for authenticating users (useful for @Autowired injection in controllers)
     @Bean
@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider).exceptionHandling(customizer -> customizer
                         .authenticationEntryPoint(new GlobalExceptionHandler.CustomAuthenticationEntryPoint()) // Custom auth exception
                         .accessDeniedHandler(new CustomException.CustomAccessDeniedHandler()) // Custom access denied exception
-                );
+                ).addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

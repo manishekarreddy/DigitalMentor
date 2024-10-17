@@ -40,7 +40,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username; // Since you're using email for authentication
+        return this.email; // Since you're using email for authentication
     }
 
     @Override
