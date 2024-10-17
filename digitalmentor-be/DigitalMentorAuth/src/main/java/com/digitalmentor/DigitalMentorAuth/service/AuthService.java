@@ -35,7 +35,7 @@ public class AuthService {
     public AuthenticationResponse registerUser(User user) {
         // Check if user already exists
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new CustomException("Email is already taken", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Email is already been taken", HttpStatus.BAD_REQUEST);
         }
 
         // Hash the password
