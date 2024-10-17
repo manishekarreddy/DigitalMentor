@@ -42,14 +42,15 @@ const Auth = () => {
   }, [resetErrors]);
 
   // Handle form submission
-  const handleFormSubmit = useCallback(() => {
+  const handleFormSubmit = useCallback(async () => {
     resetErrors();
 
+    // Ensure that 'name' is defined when in sign-up mode
     const formData = {
       mode,
       email,
       password,
-      ...(mode === "signUp" && { name }), // Include name only if it's signup mode
+      ...(mode === "signUp" && { name: name || "" }), // Provide an empty string if name is undefined
     };
 
     // Validate form data
@@ -74,24 +75,32 @@ const Auth = () => {
 
       // Proceed if no errors
       if (!resp.nameErr && !resp.emailErr && !resp.passErr) {
-        showSnackbar("User registered successfully", 'success');
-        swapModes()
+        // Ensure formData.name is defined when calling register
+        const response: Record<string, any> = await authService.register({
+          name: name!, // Using non-null assertion
+          email,
+          password,
+        });
+        if (response.success) {
+          showSnackbar(response.message, 'success');
+          swapModes(); // Switch to login mode after successful signup
+        } else {
+          showSnackbar(response.message, 'error');
+        }
       }
-
     } else if (mode === "Login") {
       // Handle login logic
-      const loginResp: Record<string, any> = authService.login(email, password);
-
+      const loginResp: Record<string, any> = authService.login(formData);
       if (loginResp.success) {
         showSnackbar(loginResp.message, 'success');
       } else {
         showSnackbar(loginResp.message, 'error');
-        // If login fails, set errors accordingly
         setEmailError(true); // Adjust as needed based on the login response
         setPasswordError(true); // Adjust as needed based on the login response
       }
     }
   }, [email, password, name, mode, authService, showSnackbar, resetErrors]);
+
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
