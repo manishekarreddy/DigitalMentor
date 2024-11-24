@@ -19,6 +19,7 @@ export interface Requirement {
     type: string;
   };
   score: number;
+  condition: string
 }
 
 export interface Program {

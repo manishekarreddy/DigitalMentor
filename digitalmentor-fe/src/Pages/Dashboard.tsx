@@ -7,8 +7,6 @@ import ProgramsList from '../Components/ProgramsList';
 const Dashboard: React.FC = () => {
     return (
         <Box>
-            {/* Include the Header Panel */}
-            <HeaderPanel />
 
             {/* Main content of the dashboard */}
             <Box sx={{ p: 4 }}>

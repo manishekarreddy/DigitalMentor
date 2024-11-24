@@ -44,7 +44,6 @@ const HeaderPanel = () => {
 
     const handleSignOut = () => {
         handleMenuClose();
-        console.log("Signing out...");
         authService.logout();
     };
 
@@ -87,18 +86,16 @@ const HeaderPanel = () => {
                             <ListItemButton>
                                 <ListItemText primary="Home" />
                             </ListItemButton>
+
                             <ListItemButton>
-                                <ListItemText primary="About" />
-                            </ListItemButton>
-                            <ListItemButton>
-                                <ListItemText primary="Contact" />
+                                <ListItemText primary="Requirements" />
                             </ListItemButton>
                         </List>
                     </Box>
                 </Drawer>
 
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    Application Name
+                    Digital Mentor
                 </Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
