@@ -5,9 +5,14 @@ import { useState, useCallback } from "react";
 import AuthService from "./AuthService";
 import { useSnackbar } from '../../Services/SnackbarContext';
 
+import { useNavigate } from 'react-router-dom';
+
+
+
 const Auth = () => {
   const authService = new AuthService();
   const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // Define mode-related states
   const [mode, setMode] = useState("Login");
@@ -21,8 +26,8 @@ const Auth = () => {
   const [passwordError, setPasswordError] = useState(false);
 
   // Form fields state
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("mani1@gmail.com");
+  const [password, setPassword] = useState<string>("12345678");
   const [name, setName] = useState<string>("");
 
   // Reset all error states
@@ -77,7 +82,7 @@ const Auth = () => {
       if (!resp.nameErr && !resp.emailErr && !resp.passErr) {
         // Ensure formData.name is defined when calling register
         const response: Record<string, any> = await authService.register({
-          name: name!, // Using non-null assertion
+          name: name!,
           email,
           password,
         });
@@ -89,14 +94,22 @@ const Auth = () => {
         }
       }
     } else if (mode === "Login") {
-      // Handle login logic
-      const loginResp: Record<string, any> = authService.login(formData);
-      if (loginResp.success) {
-        showSnackbar(loginResp.message, 'success');
-      } else {
-        showSnackbar(loginResp.message, 'error');
-        setEmailError(true); // Adjust as needed based on the login response
-        setPasswordError(true); // Adjust as needed based on the login response
+      try {
+        // Await the promise returned by the login method
+        const loginResp = await authService.login(formData);
+        console.log(loginResp);
+
+        if (loginResp.success) {
+          showSnackbar(loginResp.message, 'success');
+          navigate("/dashboard")
+        } else {
+          showSnackbar(loginResp.message, 'error');
+          setEmailError(true); // Set error state for email
+          setPasswordError(true); // Set error state for password
+        }
+      } catch (error) {
+        console.error("Error during login:", error);
+        showSnackbar("An unexpected error occurred during login.", 'error');
       }
     }
   }, [email, password, name, mode, authService, showSnackbar, resetErrors]);

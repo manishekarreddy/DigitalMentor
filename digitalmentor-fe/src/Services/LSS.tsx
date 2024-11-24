@@ -1,4 +1,4 @@
-const LocalStorageService = {
+const LSS = {
     // Save data to local storage in JSON format
     setItem: (key: any, value: any) => {
         try {
@@ -41,4 +41,4 @@ const LocalStorageService = {
     },
 };
 
-export default LocalStorageService;
+export default LSS;

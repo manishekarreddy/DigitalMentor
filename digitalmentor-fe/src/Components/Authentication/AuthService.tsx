@@ -1,9 +1,15 @@
 import { AuthResponse, LoginFormData } from '../../Interface/Interfaces';
 import httpService from '../../Services/HttpService';
+import LSS from '../../Services/LSS';
 import ValidationService from '../../Services/ValidationService';
+
+import { useNavigate } from 'react-router-dom';
 
 class AuthService {
     // Validate form data before making API requests
+
+    navigate = useNavigate();
+
     validateForm(mode: string, formData: Record<string, any>): object {
         const nameErr = mode === "signUp" && (!formData.name || formData.name.trim() === ""); // Name required for signup
         const emailErr = !formData.email || !ValidationService.validateEmail(formData.email); // Basic email validation
@@ -19,7 +25,6 @@ class AuthService {
     // Registration API call
     async register(formData: { email: string, password: string, name: string }): Promise<object> {
         try {
-            // Make POST request to /register endpoint
             const response = await httpService.post('/register', {
                 email: formData.email,
                 password: formData.password,
@@ -38,21 +43,38 @@ class AuthService {
     // Login API call
     async login(formData: LoginFormData): Promise<any> {
         try {
-            const response = await httpService.post<AuthResponse>('/login', formData);
-            const { jwt, roles }: AuthResponse = response.data;
+            // Clear existing user data
+            LSS.removeItem('user');
 
-            localStorage.setItem('token', jwt);
-            localStorage.setItem('email', formData.email);
-            localStorage.setItem('roles', JSON.stringify(roles));
+            // Send login request
+            const response = await httpService.post<AuthResponse>('/login', formData, false);
+            console.log("Authentication Response: ", response.data)
+            const { jwt, roles, id, username }: AuthResponse = response.data;
+
+            // Construct user object
+            const user = {
+                token: jwt,
+                roles: roles,
+                email: formData.email,
+                user_id: id,
+                username: username
+            };
+
+            // Store user object in localStorage
+            localStorage.setItem('user', JSON.stringify(user));
 
             return { success: true, message: "Login successful.", data: response.data };
         } catch (error) {
-            // Handle unknown error type safely
-            if (this.isAxiosError(error)) {
-                return { success: false, message: error.response?.data?.message || "Registration failed." };
-            }
-            return { success: false, message: "Registration failed due to network or server error." };
+            // Handle errors
+            console.error('Error during login:', error);
+            return { success: false, message: "Login failed. Please try again." };
         }
+
+    }
+
+    logout() {
+        LSS.removeItem('user')
+        this.navigate("/")
     }
 
     // Helper function to check if error is an Axios error
