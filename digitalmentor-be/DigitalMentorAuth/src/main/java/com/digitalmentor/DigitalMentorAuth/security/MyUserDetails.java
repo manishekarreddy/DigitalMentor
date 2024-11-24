@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class MyUserDetails implements UserDetails {
 
+    private Long id;
+
     private String email;
     private String password;
     private String username; // Assuming username is the same as email for simplicity
@@ -19,6 +21,7 @@ public class MyUserDetails implements UserDetails {
 
     // Constructor to initialize MyUserDetails with the User entity
     public MyUserDetails(User user) {
+        this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.active = user.isActive();
@@ -46,5 +49,9 @@ public class MyUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return active;
+    }
+
+    public Long getId(){
+        return this.id;
     }
 }

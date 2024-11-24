@@ -54,13 +54,15 @@ public class AuthService {
         // Generate the JWT token
         final String jwt = jwtUtil.generateToken(userDetails);
 
+        User u = userRepository.findByEmail(userDetails.getUsername()).get();
+
         // Get additional user information like roles
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         // Return both JWT and user information
-        return new AuthenticationResponse(jwt, userDetails.getUsername(), roles, userDetails.getUsername());
+        return new AuthenticationResponse(jwt,user.getEmail(), roles, user.getUsername(), user.getId());
     }
 
 }
