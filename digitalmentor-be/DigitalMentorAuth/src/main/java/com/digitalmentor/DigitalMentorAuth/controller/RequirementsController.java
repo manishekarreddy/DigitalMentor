@@ -25,4 +25,14 @@ public class RequirementsController {
     public Requirement createRequirement(@RequestBody Requirement requirement){
         return requirementService.createOrFetchRequirement(requirement);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteRequirement(@PathVariable Long id) {
+        try {
+            requirementService.deleteRequirement(id);
+            return new ResponseEntity<>("Requirement deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

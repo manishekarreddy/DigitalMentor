@@ -1,6 +1,8 @@
 package com.digitalmentor.DigitalMentorAuth.service;
 
+import com.digitalmentor.DigitalMentorAuth.entity.ProgramRequirement;
 import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.Requirement;
+import com.digitalmentor.DigitalMentorAuth.repository.ProgramRequirementRepository;
 import com.digitalmentor.DigitalMentorAuth.repository.RequirementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ public class RequirementService {
 
     @Autowired private
     RequirementRepository requirementRepository;
+
+    @Autowired private ProgramRequirementRepository programRequirementRepository;
 
     public Requirement createOrFetchRequirement(Requirement requirement) {
         // Check if a similar requirement exists in the database
@@ -32,6 +36,23 @@ public class RequirementService {
         Map<String, List<Requirement>> map = new HashMap<>();
         map.put("requirements", requirementRepository.findAll());
         return map;
+    }
+
+    public void deleteRequirement(Long requirementId) {
+        // Find the requirement by ID
+        Requirement requirement = requirementRepository.findById(requirementId)
+                .orElseThrow(() -> new IllegalArgumentException("Requirement not found"));
+
+        // Remove the requirement from all associated ProgramRequirements
+        List<ProgramRequirement> programRequirements = programRequirementRepository.findByRequirementId(requirementId);
+        for (ProgramRequirement programRequirement : programRequirements) {
+            // Remove the requirement from the program
+            programRequirement.setRequirement(null);
+            programRequirementRepository.delete(programRequirement);
+        }
+
+        // Finally, delete the requirement from the database
+        requirementRepository.delete(requirement);
     }
 
 }

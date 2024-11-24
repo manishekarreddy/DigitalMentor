@@ -34,4 +34,27 @@ public class ProgramController {
     public ResponseEntity<Map<String, List<Program>>> getAllPrograms() {
         return new ResponseEntity<>( programService.getAllPrograms(), HttpStatus.OK);
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Program> updateProgram(@PathVariable Long id, @RequestBody Program programDetails) {
+        try {
+            Program updatedProgram = programService.updateProgram(id, programDetails);
+            return ResponseEntity.ok(updatedProgram);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteProgram(@PathVariable Long id) {
+        try {
+            programService.deleteProgram(id);
+            return ResponseEntity.ok("Program deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Program not found");
+        }
+    }
+
+
 }
