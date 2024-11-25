@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import {
     AppBar,
     Toolbar,
@@ -21,6 +22,7 @@ import AuthService from '../Components/Authentication/AuthService';
 const HeaderPanel = () => {
 
     const authService = new AuthService();
+    const navigate = useNavigate();
 
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -83,18 +85,23 @@ const HeaderPanel = () => {
                         onKeyDown={toggleDrawer(false)}
                     >
                         <List>
-                            <ListItemButton>
+                            <ListItemButton component={Link} to="/dashboard">
                                 <ListItemText primary="Home" />
                             </ListItemButton>
 
-                            <ListItemButton>
+                            <ListItemButton component={Link} to="/requirements">
                                 <ListItemText primary="Requirements" />
                             </ListItemButton>
                         </List>
                     </Box>
                 </Drawer>
 
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{ flexGrow: 1, cursor: "pointer" }}
+                    onClick={() => navigate("/dashboard")} // Navigate to the dashboard
+                >
                     Digital Mentor
                 </Typography>
 

@@ -1,14 +1,14 @@
-// src/Components/ProgramsList.tsx
+// ProgramsList.tsx
 import React, { useEffect, useState } from "react";
 import { Box, Grid, Typography, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { useNavigate } from "react-router-dom";
 import ProgramCard from "./ProgramCard";
 import httpService from "../Services/HttpService";
 import { Program, ProgramsResponse } from "../Interface/Interfaces";
 
 const ProgramsList: React.FC = () => {
     const [programs, setPrograms] = useState<Program[]>([]);
-    const navigate = useNavigate(); // Initialize the navigate function
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPrograms = async () => {
@@ -24,7 +24,7 @@ const ProgramsList: React.FC = () => {
     }, []);
 
     const handleCreateProgramClick = () => {
-        navigate("/create-program"); // Navigate to the Create Program page
+        navigate("/create-program");
     };
 
     return (
@@ -36,7 +36,7 @@ const ProgramsList: React.FC = () => {
                 variant="contained"
                 color="primary"
                 sx={{ mb: 3 }}
-                onClick={handleCreateProgramClick} // Handle button click
+                onClick={handleCreateProgramClick}
             >
                 Create New Program
             </Button>

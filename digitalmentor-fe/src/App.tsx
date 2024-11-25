@@ -8,7 +8,7 @@ import Auth from "./Components/Authentication/Auth";
 // import ProgramRequirementsDashboard from "./Components/misc/ProgramRequirementsDashboard";
 // import ProgramApplicationsView from "./Components/misc/applicants";
 import Dashboard from "./Pages/Dashboard";
-import CreateProgram from "./Components/CreateProgram";
+import CreateProgram from "./Components/CreateProgram1";
 import HeaderPanel from "./Pages/HeaderPanel";
 import RequirementsPage from "./Pages/RequirementsPage";
 
