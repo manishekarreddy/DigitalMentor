@@ -22,7 +22,7 @@ public class ProgramController {
 
     @PostMapping("/create")
     public Program createProgram(@RequestBody Program program){
-        return programService.saveProgram(program);
+        return programService.createProgram(program);
     }
 
     @GetMapping("/{id}/details")

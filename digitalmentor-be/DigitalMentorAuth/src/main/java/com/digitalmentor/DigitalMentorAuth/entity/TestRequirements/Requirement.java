@@ -11,14 +11,15 @@ import lombok.Setter;
 @Setter
 public class Requirement {
 
-    private @Id
-    @GeneratedValue Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false) // Ensures 'name' is not null
+    @Column(nullable = false)
     private String name;  // e.g., IELTS, GRE, TOEFL
 
     @Column(nullable = false)
-    private String type;  // Type of the assessment (e.g., "language", "standard")
+    private String type; // Type of the assessment (e.g., "language", "standard")
 
     public Requirement(Long id, String type, double score, String name) {
         this.id = id;

@@ -10,11 +10,22 @@ import {
 } from "@mui/material";
 import { Program } from "../Interface/Interfaces";
 
+import { useNavigate } from 'react-router-dom';
+
 interface ProgramCardProps {
     program: Program;
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
+
+    const navigate = useNavigate();
+
+    const handleCardClick = () => {
+        // Navigate to '/create-program/:id' where :id is the program's ID
+        navigate(`/create-program/${program.id}`);
+    };
+
+
     return (
         <Card
             sx={{
@@ -23,6 +34,8 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
                 transition: "transform 0.3s ease-in-out",
                 "&:hover": { transform: "scale(1.03)" },
             }}
+
+            onClick={handleCardClick}
         >
             <CardContent>
                 <Typography

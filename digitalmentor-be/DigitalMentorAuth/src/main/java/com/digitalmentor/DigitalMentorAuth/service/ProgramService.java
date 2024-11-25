@@ -4,6 +4,7 @@ package com.digitalmentor.DigitalMentorAuth.service;
 import com.digitalmentor.DigitalMentorAuth.entity.Program;
 import com.digitalmentor.DigitalMentorAuth.entity.ProgramRequirement;
 import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.Requirement;
+import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.ScoreRange;
 import com.digitalmentor.DigitalMentorAuth.repository.ProgramRepository;
 import com.digitalmentor.DigitalMentorAuth.repository.RequirementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,42 +25,45 @@ public class ProgramService {
     private RequirementRepository requirementRepository;
 
 
-    public Program saveProgram(Program program) {
+    public Program createProgram(Program program) {
         if (program.getProgramRequirements() == null || program.getProgramRequirements().isEmpty()) {
             throw new IllegalArgumentException("Program must have at least one requirement.");
         }
 
-        // Create a temporary list to hold the updated ProgramRequirement objects
-        List<ProgramRequirement> updatedProgramRequirements = new ArrayList<>();
-
-        // Process each program-specific requirement
-        for (ProgramRequirement programRequirement : program.getProgramRequirements()) {
-            // Fetch the global requirement by its ID
-            Requirement requirement = requirementRepository.findById(programRequirement.getRequirement().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Requirement not found with ID: "
-                            + programRequirement.getRequirement().getId()));
-
-            if (programRequirement.getCondition() == null) {
-                throw new IllegalArgumentException("Condition (AND/OR) must be specified for each ProgramRequirement.");
-            }
-
-            // Associate the requirement and the program
-            programRequirement.setRequirement(requirement);
-            programRequirement.setProgram(program);
-
-            // Add to the temporary list
-            updatedProgramRequirements.add(programRequirement);
+        if (program.getName().length() > 255) {
+            program.setName(program.getName().substring(0, 255));  // Truncate name to 255 characters
+        }
+        if (program.getDescription().length() > 255) {
+            program.setDescription(program.getDescription().substring(0, 255));  // Truncate description to 255 characters
         }
 
-        // Set the updated list of ProgramRequirements to the program
-        program.setProgram_requirement(updatedProgramRequirements);
+        for (ProgramRequirement pr : program.getProgramRequirements()) {
 
-        // Save the program along with its requirements
+            for (ScoreRange scoreRange : pr.getScoreRanges()) {
+                // Check if the scoreRange ID is 0, which indicates it's a new record
+                if (scoreRange.getId() == 0) {
+                    scoreRange.setId(null); // Set ID to null for new record (auto-generation)
+                }
+            }
+
+            // Validate the Requirement
+            Requirement requirement = requirementRepository.findById(pr.getRequirement().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Requirement not found with ID: " + pr.getRequirement().getId()));
+
+            pr.setRequirement(requirement);
+            pr.setProgram(program);
+
+            // Associate each ScoreRange with the ProgramRequirement
+            if (pr.getScoreRanges() != null) {
+                for (ScoreRange sr : pr.getScoreRanges()) {
+                    sr.setProgramRequirement(pr);
+                }
+            }
+        }
+
+        // Save the Program with all nested objects
         return programRepository.save(program);
     }
-
-
-
 
     public ResponseEntity<Program> programDetails(Long id){
         Optional<Program> program = programRepository.findById(id);
@@ -75,28 +79,27 @@ public class ProgramService {
     }
 
     public Program updateProgram(Long id, Program programDetails) {
-        // Fetch the existing program
         Program existingProgram = programRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Program not found"));
 
-        // Update the program's general information (name, description, etc.)
+// Update the program's general information (name, description, etc.)
         existingProgram.setName(programDetails.getName());
         existingProgram.setDescription(programDetails.getDescription());
 
-        // Existing requirements from the database
+// Existing requirements from the database
         List<ProgramRequirement> existingRequirements = existingProgram.getProgramRequirements();
 
-        // New requirements from the update request
+// New requirements from the update request
         List<ProgramRequirement> updatedRequirements = programDetails.getProgramRequirements();
 
-        // Map existing requirements by their IDs for quick lookup
+// Map existing requirements by their IDs for quick lookup
         Map<Long, ProgramRequirement> existingRequirementsMap = existingRequirements.stream()
                 .collect(Collectors.toMap(req -> req.getRequirement().getId(), req -> req));
 
-        // Clear the existing program requirements
+// Clear the existing program requirements to replace with updated ones
         existingRequirements.clear();
 
-        // Process the updated requirements
+// Process the updated requirements
         for (ProgramRequirement updatedRequirement : updatedRequirements) {
             Requirement requirement = requirementRepository.findById(updatedRequirement.getRequirement().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Requirement not found"));
@@ -106,20 +109,48 @@ public class ProgramService {
 
             if (existingRequirement != null) {
                 // Update the existing requirement's fields
-                existingRequirement.setScore(updatedRequirement.getScore());
                 existingRequirement.setCondition(updatedRequirement.getCondition());
+
+                // Handle score ranges (if provided)
+                List<ScoreRange> updatedScoreRanges = updatedRequirement.getScoreRanges();
+                List<ScoreRange> existingScoreRanges = existingRequirement.getScoreRanges();
+
+                // Remove orphaned score ranges if they are not referenced anymore
+                existingScoreRanges.removeIf(scoreRange -> !updatedScoreRanges.contains(scoreRange));
+
+                // Add new or updated score ranges
+                for (ScoreRange updatedScoreRange : updatedScoreRanges) {
+                    if (updatedScoreRange.getId() == 0) {
+                        // New ScoreRange - set ProgramRequirement
+                        updatedScoreRange.setProgramRequirement(existingRequirement);
+                        existingScoreRanges.add(updatedScoreRange);
+                    } else {
+                        // Existing ScoreRange - update its fields if necessary
+                        // Ensure the ProgramRequirement is set properly for existing score ranges
+                        updatedScoreRange.setProgramRequirement(existingRequirement);
+                        existingScoreRanges.add(updatedScoreRange); // This will update the existing score range
+                    }
+                }
+
                 existingRequirements.add(existingRequirement);
             } else {
-                // Add new requirement
+                // Add new requirement with its score ranges
                 updatedRequirement.setRequirement(requirement);
                 updatedRequirement.setProgram(existingProgram);
+
+                // Add new score ranges and ensure their `programRequirement` is set
+                for (ScoreRange scoreRange : updatedRequirement.getScoreRanges()) {
+                    scoreRange.setProgramRequirement(updatedRequirement);
+                }
+
                 existingRequirements.add(updatedRequirement);
             }
         }
 
-        // Save the updated program (cascading will handle requirements)
+// Save the updated program (cascading will handle requirements and score ranges)
         return programRepository.save(existingProgram);
     }
+
 
     public void deleteProgram(Long id) {
         // Fetch the program from the database

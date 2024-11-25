@@ -1,6 +1,7 @@
 package com.digitalmentor.DigitalMentorAuth.entity;
 
 import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.Requirement;
+import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.ScoreRange;
 import com.digitalmentor.DigitalMentorAuth.enums.Condition;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -9,36 +10,41 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@Getter
-@Setter
 @AllArgsConstructor
 public class ProgramRequirement {
 
-    private @Id
-    @GeneratedValue Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     private Requirement requirement; // Reference to global requirement
 
-    private double score; // Program-specific score for this requirement
+    @Enumerated(EnumType.STRING)
+    private Condition condition; // Condition for this specific requirement (AND/OR)
 
     @ManyToOne
-    @JsonIgnore // Prevent recursion during serialization
-    private Program program; // Link back to the program
+    @JsonIgnore // Prevents infinite recursion when serializing
+    private Program program;; // Link back to the program
 
-    @Enumerated(EnumType.STRING) // Store the condition as a string (OR/AND)
-    private Condition condition; // Condition for this specific requirement (AND/OR)
+    @OneToMany(mappedBy = "programRequirement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScoreRange> scoreRanges = new ArrayList<>();
 
     public ProgramRequirement() {}
 
-    public ProgramRequirement(Long id, Program program, Requirement requirement, double score, Condition condition) {
+    public ProgramRequirement(Long id, Program program, Requirement requirement, Condition condition) {
         this.id = id;
         this.program = program;
         this.requirement = requirement;
-        this.score = score;
         this.condition = condition;
     }
+
+    // Getters and setters
+
 
     public Long getId() {
         return id;
@@ -46,14 +52,6 @@ public class ProgramRequirement {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Program getProgram() {
-        return program;
-    }
-
-    public void setProgram(Program program) {
-        this.program = program;
     }
 
     public Requirement getRequirement() {
@@ -64,14 +62,6 @@ public class ProgramRequirement {
         this.requirement = requirement;
     }
 
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
     public Condition getCondition() {
         return condition;
     }
@@ -80,5 +70,20 @@ public class ProgramRequirement {
         this.condition = condition;
     }
 
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    public List<ScoreRange> getScoreRanges() {
+        return scoreRanges;
+    }
+
+    public void setScoreRanges(List<ScoreRange> scoreRanges) {
+        this.scoreRanges = scoreRanges;
+    }
 }
 
