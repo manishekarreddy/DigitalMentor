@@ -29,7 +29,7 @@ function App() {
     <SnackbarProvider>
       <Router>
         {/* Render HeaderPanel outside Routes, but inside Router */}
-        {isLoggedIn && <HeaderPanel />}
+        {<HeaderPanel />}
 
         <Routes>
           {/* Default Route */}

@@ -1,5 +1,5 @@
 // ProgramCard.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Card,
     CardContent,
@@ -11,6 +11,7 @@ import {
 import { Program } from "../Interface/Interfaces";
 
 import { useNavigate } from 'react-router-dom';
+import LSS from "../Services/LSS";
 
 interface ProgramCardProps {
     program: Program;
@@ -18,11 +19,23 @@ interface ProgramCardProps {
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
 
+    const [editProgram, setEditProgram] = useState<boolean>(false);
+
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const mode = LSS.getItem("mode"); // Getting the mode from localStorage
+        if (mode && mode.toLowerCase() === "admin") {
+            setEditProgram(true)
+        }
+    }, []);
+
 
     const handleCardClick = () => {
         // Navigate to '/create-program/:id' where :id is the program's ID
-        navigate(`/create-program/${program.id}`);
+        if (editProgram) {
+            navigate(`/create-program/${program.id}`);
+        }
     };
 
 

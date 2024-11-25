@@ -112,36 +112,72 @@ const RequirementsPage: React.FC = () => {
                         Existing Requirements
                     </Typography>
                     {requirements.map((requirement) => (
-                        <Card key={requirement.id} sx={{ mb: 2, maxWidth: 180, minWidth: 150 }}>
-                            <CardContent
+                        <Card
+                            key={requirement.id}
+                            sx={{
+                                mb: 1, // Reduced margin between cards
+                                maxWidth: 140, // Smaller width for compact size
+                                minWidth: 100, // Adjust minimum width
+                                p: 0.5, // Reduced padding inside the card
+                                position: "relative", // For delete button positioning
+                                border: "1px solid #ddd", // Optional subtle border for compact appearance
+                                boxShadow: 1, // Subtle shadow for better integration
+                                borderRadius: 1, // Small radius for a sleeker design
+                                textAlign: "center",
+                            }}
+                        >
+                            {/* Delete button positioned in the top-right corner */}
+                            <IconButton
+                                color="secondary"
+                                onClick={() => handleDeleteRequirement(requirement.id)}
                                 sx={{
-                                    borderRadius: 2,
-                                    boxShadow: 3,
-                                    transition: "transform 0.3s ease-in-out",
-                                    padding: "8px", // Reduced padding for a more compact card
-                                    backgroundColor: "transparent", // Make background transparent
-                                    cursor: "pointer",
-                                    "&:hover": { transform: "scale(1.03)" },
-                                    textAlign: "center", // Center the text inside the card
+                                    position: "absolute",
+                                    top: 2, // Closer to the edge for compactness
+                                    right: 2,
+                                    padding: "1px", // Smaller padding for compact size
+                                    fontSize: "14px", // Smaller size for compact look
                                 }}
                             >
-                                <Typography variant="body2" sx={{ fontWeight: 600, marginBottom: "4px", fontSize: "14px" }}>
+                                ×
+                            </IconButton>
+
+                            {/* Card content */}
+                            <CardContent
+                                sx={{
+                                    padding: "4px", // Reduced padding for content
+                                    textAlign: "center",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: "2px", // Smaller gap between items
+                                }}
+                            >
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: "11px", // Further reduced font size
+                                        overflow: "hidden", // Prevent overflow for long names
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                    }}
+                                >
                                     {requirement.name}
                                 </Typography>
-                                <Typography variant="caption" color="textSecondary" sx={{ fontSize: "12px", marginBottom: "8px" }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        color: "textSecondary",
+                                        fontSize: "9px", // Reduced caption size
+                                    }}
+                                >
                                     {requirement.type}
                                 </Typography>
-                                <IconButton
-                                    color="secondary"
-                                    onClick={() => handleDeleteRequirement(requirement.id)}
-                                    sx={{ mt: 1 }}
-                                >
-                                    Delete
-                                </IconButton>
                             </CardContent>
                         </Card>
                     ))}
                 </Grid>
+
             </Grid>
         </Box>
     );
