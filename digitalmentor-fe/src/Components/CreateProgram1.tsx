@@ -12,14 +12,14 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle, Chip
+    DialogTitle
 } from "@mui/material";
 
 import { Close as CloseIcon } from "@mui/icons-material";
 import httpService from "../Services/HttpService";
 import { useSnackbar } from "../Services/SnackbarContext";
 import { useParams, useNavigate } from "react-router-dom";
-import { Program, ProgramRequirement, Requirement, ScoreRange } from "../Interface/Interfaces"; // Import interfaces
+import { Program, ProgramRequirement, Requirement } from "../Interface/Interfaces"; // Import interfaces
 
 const CreateProgram: React.FC = () => {
     const [programName, setProgramName] = useState("");
@@ -111,7 +111,7 @@ const CreateProgram: React.FC = () => {
                 const newMaxScore = newMinScore + 0.6; // Define the range as 0.6 (e.g., for 7 - 7.6)
 
                 const newScoreRange = {
-                    id: Date.now(),
+                    id: 0,
                     minScore: newMinScore,
                     maxScore: newMaxScore,
                     weight: 1,

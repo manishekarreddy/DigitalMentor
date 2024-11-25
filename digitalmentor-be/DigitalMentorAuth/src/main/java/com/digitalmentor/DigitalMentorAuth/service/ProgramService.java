@@ -1,12 +1,16 @@
 package com.digitalmentor.DigitalMentorAuth.service;
 
 
+import com.digitalmentor.DigitalMentorAuth.controller.EvaluationResult;
+import com.digitalmentor.DigitalMentorAuth.controller.StudentScore;
 import com.digitalmentor.DigitalMentorAuth.entity.Program;
 import com.digitalmentor.DigitalMentorAuth.entity.ProgramRequirement;
 import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.Requirement;
 import com.digitalmentor.DigitalMentorAuth.entity.TestRequirements.ScoreRange;
 import com.digitalmentor.DigitalMentorAuth.repository.ProgramRepository;
 import com.digitalmentor.DigitalMentorAuth.repository.RequirementRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,9 @@ public class ProgramService {
 
     @Autowired
     private ProgramRepository programRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     private RequirementRepository requirementRepository;
@@ -159,6 +166,51 @@ public class ProgramService {
 
         // Delete the program (this will also delete related ProgramRequirements because of CascadeType.ALL)
         programRepository.delete(program);
+    }
+
+    public List<EvaluationResult> evaluateStudent(List<StudentScore> studentScores) {
+        // 1. Fetch all programs
+        List<Program> allPrograms = programRepository.findAll();
+
+        // 2. Prepare results
+        List<EvaluationResult> results = new ArrayList<>();
+
+        for (Program program : allPrograms) {
+            double totalWeightage = 0.0;      // Student's total weightage for the program
+            double maxWeightage = 0.0;       // Maximum possible weightage for the program
+
+            for (ProgramRequirement programRequirement : program.getProgramRequirements()) {
+                // Fetch the student's score for this requirement
+                StudentScore studentScore = studentScores.stream()
+                        .filter(score -> score.getRequirementId().equals(programRequirement.getRequirement().getId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (studentScore != null) {
+                    // Match score against score ranges
+                    for (ScoreRange range : programRequirement.getScoreRanges()) {
+                        maxWeightage += range.getWeight(); // Accumulate max weightage
+
+                        if (studentScore.getScore() >= range.getMinScore() && studentScore.getScore() <= range.getMaxScore()) {
+                            totalWeightage += range.getWeight(); // Accumulate student's weightage
+                            break; // Exit loop after finding the matching range
+                        }
+                    }
+                }
+            }
+
+            // 3. Calculate percentage score
+            double percentageScore = (maxWeightage > 0) ? (totalWeightage / maxWeightage) * 100 : 0;
+
+            // 4. Add evaluation result
+            results.add(new EvaluationResult(
+                    program.getId(),
+                    program.getName(),
+                    totalWeightage,
+                    percentageScore
+            ));
+        }
+        return results;
     }
 
 }

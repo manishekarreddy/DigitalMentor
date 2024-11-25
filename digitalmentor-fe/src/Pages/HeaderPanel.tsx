@@ -32,7 +32,7 @@ const HeaderPanel = () => {
     useEffect(() => {
         const user = LSS.getItem("user");
         if (user) {
-            setUserName(user.username); // Set userName only when the user is available
+            setUserName(user.username);
         }
     }, []);
 

@@ -51,6 +51,7 @@ class AuthService {
             console.log("Authentication Response: ", response.data)
             const { jwt, roles, id, username }: AuthResponse = response.data;
 
+
             // Construct user object
             const user = {
                 token: jwt,
@@ -59,6 +60,14 @@ class AuthService {
                 user_id: id,
                 username: username
             };
+
+            const hasAdminRole = user.roles.some(role => role.toLowerCase().includes("admin"));
+
+            if (hasAdminRole) {
+                LSS.setItem("mode", "admin")
+            } else {
+                LSS.setItem("mode", "user")
+            }
 
             // Store user object in localStorage
             localStorage.setItem('user', JSON.stringify(user));

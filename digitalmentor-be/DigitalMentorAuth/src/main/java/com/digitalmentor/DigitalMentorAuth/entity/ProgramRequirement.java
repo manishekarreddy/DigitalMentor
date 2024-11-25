@@ -31,7 +31,7 @@ public class ProgramRequirement {
     @JsonIgnore // Prevents infinite recursion when serializing
     private Program program;; // Link back to the program
 
-    @OneToMany(mappedBy = "programRequirement", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "programRequirement", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<ScoreRange> scoreRanges = new ArrayList<>();
 
     public ProgramRequirement() {}

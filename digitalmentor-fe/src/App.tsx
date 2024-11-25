@@ -11,13 +11,15 @@ import Dashboard from "./Pages/Dashboard";
 import CreateProgram from "./Components/CreateProgram1";
 import HeaderPanel from "./Pages/HeaderPanel";
 import RequirementsPage from "./Pages/RequirementsPage";
+import LSS from "./Services/LSS";
+import GuestExamForm from "./Components/GuestExamForm";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Check if the user is logged in (this could be based on a token or localStorage)
-    const token = localStorage.getItem("user");
+    const token = LSS.getItem("user");
     if (token) {
       setIsLoggedIn(true);
     }
@@ -40,6 +42,7 @@ function App() {
           {/* Other Routes */}
           <Route path="/create-program/:id?" element={<CreateProgram />} />
           <Route path="/requirements" element={<RequirementsPage />} />
+          <Route path="/profileform" element={<GuestExamForm />} />
         </Routes>
       </Router>
     </SnackbarProvider>

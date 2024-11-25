@@ -27,8 +27,8 @@ const Auth = () => {
   const [passwordError, setPasswordError] = useState(false);
 
   // Form fields state
-  const [email, setEmail] = useState<string>("mani1@gmail.com");
-  const [password, setPassword] = useState<string>("12345678");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
 
   // Reset all error states

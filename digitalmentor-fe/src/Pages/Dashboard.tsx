@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
-import HeaderPanel from './HeaderPanel'; // Adjust the import path as needed
+import { Box } from '@mui/material'; // Adjust the import path as needed
 import ProgramsList from '../Components/ProgramsList';
 
 
