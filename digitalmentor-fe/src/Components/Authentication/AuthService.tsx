@@ -1,24 +1,19 @@
+import { AuthResponse, LoginFormData } from '../../Interface/Interfaces';
+import httpService from '../../Services/HttpService';
+import LSS from '../../Services/LSS';
 import ValidationService from '../../Services/ValidationService';
-import LocalStorageService from '../../Services/LocalStorageService';
+
+import { useNavigate } from 'react-router-dom';
 
 class AuthService {
+    // Validate form data before making API requests
+
+    navigate = useNavigate();
+
     validateForm(mode: string, formData: Record<string, any>): object {
         const nameErr = mode === "signUp" && (!formData.name || formData.name.trim() === ""); // Name required for signup
         const emailErr = !formData.email || !ValidationService.validateEmail(formData.email); // Basic email validation
         const passErr = !formData.password || !ValidationService.validatePassword(formData.password); // Password must be at least 4 characters
-
-        console.log("in Auth Service", formData);
-        const hasErr = !!(nameErr || passErr || emailErr);
-
-        if (!hasErr && mode === "signUp") {
-            if (!this.emailExists(formData.email)) {
-                // Store the user data if the email doesn't exist
-                LocalStorageService.setItem("user", { email: formData.email, name: formData.name, password: formData.password });
-                return { success: true, message: "User registered successfully." };
-            } else {
-                return { emailErr: "Email is already in use." };
-            }
-        }
 
         return {
             nameErr: nameErr ? "Name is required." : null,
@@ -27,38 +22,73 @@ class AuthService {
         };
     };
 
-    emailExists(email: string): boolean {
-        const user = LocalStorageService.getItem("user");
-        // Assuming LocalStorageService.getItem returns null or an object
-        return user && user.email === email;
+    // Registration API call
+    async register(formData: { email: string, password: string, name: string }): Promise<object> {
+        try {
+            const response = await httpService.post('/register', {
+                email: formData.email,
+                password: formData.password,
+                username: formData.name, // Assuming backend expects 'username' for name
+            });
+            return { success: true, message: "User registered successfully.", data: response.data };
+        } catch (error) {
+            // Handle unknown error type safely
+            if (this.isAxiosError(error)) {
+                return { success: false, message: error.response?.data?.message || "Registration failed." };
+            }
+            return { success: false, message: "Registration failed due to network or server error." };
+        }
     }
 
-    // Additional method to handle login
-    login(email: string, password: string): object {
-        // Validate email and password formats before checking the user
-        const emailErr = !ValidationService.validateEmail(email); // Check if email is valid
-        const passErr = !ValidationService.validatePassword(password); // Check if password is valid
+    // Login API call
+    async login(formData: LoginFormData): Promise<any> {
+        try {
+            // Clear existing user data
+            LSS.removeItem('user');
 
-        if (emailErr) {
-            return { success: false, message: "Email is invalid." };
-        }
-        if (passErr) {
-            return { success: false, message: "Password must be at least 4 characters." };
-        }
+            // Send login request
+            const response = await httpService.post<AuthResponse>('/login', formData, false);
+            console.log("Authentication Response: ", response.data)
+            const { jwt, roles, id, username }: AuthResponse = response.data;
 
-        const user = LocalStorageService.getItem("user");
-        if (user) {
-            if (user.email === email) {
-                if (user.password === password) {
-                    return { success: true, message: "Login successful." };
-                } else {
-                    return { success: false, message: "Invalid password." };
-                }
+
+            // Construct user object
+            const user = {
+                token: jwt,
+                roles: roles,
+                email: formData.email,
+                user_id: id,
+                username: username
+            };
+
+            const hasAdminRole = user.roles.some(role => role.toLowerCase().includes("admin"));
+
+            if (hasAdminRole) {
+                LSS.setItem("mode", "admin")
             } else {
-                return { success: false, message: "Email not found." };
+                LSS.setItem("mode", "user")
             }
+
+            // Store user object in localStorage
+            localStorage.setItem('user', JSON.stringify(user));
+
+            return { success: true, message: "Login successful.", data: response.data };
+        } catch (error) {
+            // Handle errors
+            console.error('Error during login:', error);
+            return { success: false, message: "Login failed. Please try again." };
         }
-        return { success: false, message: "No user registered." };
+
+    }
+
+    logout() {
+        LSS.removeItem('user')
+        this.navigate("/")
+    }
+
+    // Helper function to check if error is an Axios error
+    private isAxiosError(error: unknown): error is { response: { data: { message: string } } } {
+        return typeof error === 'object' && error !== null && 'response' in error;
     }
 }
 

@@ -3,7 +3,9 @@ package com.digitalmentor.DigitalMentorAuth.controller;
 import com.digitalmentor.DigitalMentorAuth.entity.User;
 import com.digitalmentor.DigitalMentorAuth.model.AuthenticationRequest;
 import com.digitalmentor.DigitalMentorAuth.model.AuthenticationResponse;
+import com.digitalmentor.DigitalMentorAuth.repository.UserRepository;
 import com.digitalmentor.DigitalMentorAuth.security.JwtUtil;
+import com.digitalmentor.DigitalMentorAuth.service.AuthService;
 import com.digitalmentor.DigitalMentorAuth.service.MyUserDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ public class AuthController {
 
     @Autowired
     private MyUserDetailsService userDetailsService;
+
+    @Autowired private AuthService authService;
+
+    @Autowired private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -47,13 +53,22 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Return both JWT and user information
-        return new AuthenticationResponse(jwt, userDetails.getUsername(), roles, userDetails.getUsername());
+        User user = userRepository.findByEmail(userDetails.getUsername()).get();
+
+
+        AuthenticationResponse resp = new AuthenticationResponse(jwt,user.getEmail(), roles, user.getUsername(), user.getId());
+        return resp;
+
     }
 
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
-        return userDetailsService.registerUser(user);
+    public AuthenticationResponse registerUser(@RequestBody User user) {
+        return authService.registerUser(user);
+    }
+
+    @GetMapping("/secret")
+    public String resource() {
+        return "Thois is protrected resource";
     }
 
 }

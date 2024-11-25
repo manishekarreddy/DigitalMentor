@@ -15,7 +15,9 @@ import java.util.Optional;
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Autowired
     private UserRepository userRepository;
@@ -26,23 +28,5 @@ public class MyUserDetailsService implements UserDetailsService {
         user.orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return new MyUserDetails(user.get());
-    }
-
-    public User registerUser(User user) {
-        // Check if user already exists
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email is already taken");
-        }
-
-        // Hash the password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setActive(true); // Set the user to active by default
-        user.setRoles(List.of("ROLE_USER")); // Set the user's role to USER by default
-
-        // Save the user
-        User savedUser = userRepository.save(user);
-
-        // Optionally, return additional user details as needed
-        return savedUser;
     }
 }

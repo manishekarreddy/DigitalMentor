@@ -5,9 +5,15 @@ import { useState, useCallback } from "react";
 import AuthService from "./AuthService";
 import { useSnackbar } from '../../Services/SnackbarContext';
 
+import { useNavigate } from 'react-router-dom';
+import LSS from "../../Services/LSS";
+
+
+
 const Auth = () => {
   const authService = new AuthService();
   const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // Define mode-related states
   const [mode, setMode] = useState("Login");
@@ -41,15 +47,23 @@ const Auth = () => {
     resetErrors();
   }, [resetErrors]);
 
+
+  const continueAsGuest = () => {
+    LSS.removeItem("user")
+    LSS.setItem("mode", "guest")
+    navigate("/dashboard")
+  }
+
   // Handle form submission
-  const handleFormSubmit = useCallback(() => {
+  const handleFormSubmit = useCallback(async () => {
     resetErrors();
 
+    // Ensure that 'name' is defined when in sign-up mode
     const formData = {
       mode,
       email,
       password,
-      ...(mode === "signUp" && { name }), // Include name only if it's signup mode
+      ...(mode === "signUp" && { name: name || "" }), // Provide an empty string if name is undefined
     };
 
     // Validate form data
@@ -74,24 +88,40 @@ const Auth = () => {
 
       // Proceed if no errors
       if (!resp.nameErr && !resp.emailErr && !resp.passErr) {
-        showSnackbar("User registered successfully", 'success');
-        swapModes()
+        // Ensure formData.name is defined when calling register
+        const response: Record<string, any> = await authService.register({
+          name: name!,
+          email,
+          password,
+        });
+        if (response.success) {
+          showSnackbar(response.message, 'success');
+          swapModes(); // Switch to login mode after successful signup
+        } else {
+          showSnackbar(response.message, 'error');
+        }
       }
-
     } else if (mode === "Login") {
-      // Handle login logic
-      const loginResp: Record<string, any> = authService.login(email, password);
+      try {
+        // Await the promise returned by the login method
+        const loginResp = await authService.login(formData);
+        console.log(loginResp);
 
-      if (loginResp.success) {
-        showSnackbar(loginResp.message, 'success');
-      } else {
-        showSnackbar(loginResp.message, 'error');
-        // If login fails, set errors accordingly
-        setEmailError(true); // Adjust as needed based on the login response
-        setPasswordError(true); // Adjust as needed based on the login response
+        if (loginResp.success) {
+          showSnackbar(loginResp.message, 'success');
+          navigate("/dashboard")
+        } else {
+          showSnackbar(loginResp.message, 'error');
+          setEmailError(true); // Set error state for email
+          setPasswordError(true); // Set error state for password
+        }
+      } catch (error) {
+        console.error("Error during login:", error);
+        showSnackbar("An unexpected error occurred during login.", 'error');
       }
     }
   }, [email, password, name, mode, authService, showSnackbar, resetErrors]);
+
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -195,6 +225,17 @@ const Auth = () => {
                 onClick={swapModes} // Swap modes on button click
               >
                 {switchModesText}
+              </Button>
+
+
+              <Button
+                id="swapMethodBtn"
+                color="secondary"
+                fullWidth
+                style={{ marginTop: "25px" }}
+                onClick={continueAsGuest} // Swap modes on button click
+              >
+                Continue as Guest ?
               </Button>
             </CardContent>
           </Grid>
