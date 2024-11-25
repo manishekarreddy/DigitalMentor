@@ -6,6 +6,7 @@ import AuthService from "./AuthService";
 import { useSnackbar } from '../../Services/SnackbarContext';
 
 import { useNavigate } from 'react-router-dom';
+import LSS from "../../Services/LSS";
 
 
 
@@ -45,6 +46,13 @@ const Auth = () => {
     setPanelHeading(prevHeading => (prevHeading === "Login" ? "Sign Up" : "Login"));
     resetErrors();
   }, [resetErrors]);
+
+
+  const continueAsGuest = () => {
+    LSS.removeItem("user")
+    LSS.setItem("mode", "guest")
+    navigate("/dashboard")
+  }
 
   // Handle form submission
   const handleFormSubmit = useCallback(async () => {
@@ -217,6 +225,17 @@ const Auth = () => {
                 onClick={swapModes} // Swap modes on button click
               >
                 {switchModesText}
+              </Button>
+
+
+              <Button
+                id="swapMethodBtn"
+                color="secondary"
+                fullWidth
+                style={{ marginTop: "25px" }}
+                onClick={continueAsGuest} // Swap modes on button click
+              >
+                Continue as Guest ?
               </Button>
             </CardContent>
           </Grid>

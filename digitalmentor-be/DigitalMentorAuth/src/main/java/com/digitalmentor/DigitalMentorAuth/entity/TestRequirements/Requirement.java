@@ -12,7 +12,7 @@ import lombok.Setter;
 public class Requirement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue()
     private Long id;
 
     @Column(nullable = false)
@@ -21,7 +21,7 @@ public class Requirement {
     @Column(nullable = false)
     private String type; // Type of the assessment (e.g., "language", "standard")
 
-    public Requirement(Long id, String type, double score, String name) {
+    public Requirement(Long id, String type, String name) {
         this.id = id;
         this.type = type;
         this.name = name;
