@@ -102,7 +102,7 @@ const HeaderPanel = () => {
                     sx={{ flexGrow: 1, cursor: "pointer" }}
                     onClick={() => navigate("/dashboard")} // Navigate to the dashboard
                 >
-                    Digital Mentor
+                    Program Fit
                 </Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
