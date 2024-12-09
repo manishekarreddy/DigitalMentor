@@ -36,13 +36,6 @@ const GuestExamForm: React.FC = () => {
     const [evaluationResults, setEvaluationResults] = useState<ProgramEvaluation[]>([]);
 
     useEffect(() => {
-
-        const isRedirectFromGuest = LSS.getItem("guestId")
-
-        if (isRedirectFromGuest) {
-            handleSaveAsGuest()
-        }
-
         const fetchData = async () => {
             try {
                 setLoading(true);
@@ -64,12 +57,12 @@ const GuestExamForm: React.FC = () => {
                 if (mySkillsResponse.data && Array.isArray(mySkillsResponse.data)) {
                     const mySkills = mySkillsResponse.data;
 
-                    // Define the type for updatedSelectedRequirements
                     const updatedSelectedRequirements: { id: number; name: string; score: number }[] = [];
                     const updatedScores = { ...initialScores };
 
                     mySkills.forEach((skill) => {
                         updatedScores[skill.requirementId] = skill.score;
+
                         const selectedRequirement = requirements.find((req) => req.id === skill.requirementId);
                         if (selectedRequirement) {
                             updatedSelectedRequirements.push({
@@ -77,6 +70,9 @@ const GuestExamForm: React.FC = () => {
                                 name: selectedRequirement.name,
                                 score: skill.score,
                             });
+
+                            // Trigger handleScoreChange for each requirement
+                            handleScoreChange(selectedRequirement.id, skill.score);
                         }
                     });
 
@@ -90,8 +86,16 @@ const GuestExamForm: React.FC = () => {
             }
         };
 
+        const isRedirectFromGuest = LSS.getItem("guestId");
+
+        if (isRedirectFromGuest) {
+            // Avoid unnecessary guest saving on initial load
+            handleSaveAsGuest();
+        }
+
         fetchData();
-    }, []);
+    }, []);  // Adding empty dependency array ensures it runs once on mount
+
 
     const handleScoreChange = (requirementId: number, score: number) => {
         // Update scores state
@@ -193,6 +197,7 @@ const GuestExamForm: React.FC = () => {
                     LSS.removeItem("guestId");
                 } else {
                     await httpService.post(`/api/saveTechnicalDetails`, technicalDetails);
+                    LSS.removeItem("guestId");
                 }
 
             } catch (error) {
@@ -393,25 +398,27 @@ const GuestExamForm: React.FC = () => {
                 </Grid>
             </Grid>
 
-            <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 4 }}
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? "Submitting..." : "Submit Exam Details"}
-            </Button>
+            <Grid>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 4 }}
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? "Submitting..." : "Submit Exam Details"}
+                </Button>
 
-            {/* Save Button */}
-            <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 4 }}
-                onClick={handleSaveAsGuest}
-            >
-                Save as Guest
-            </Button>
+                {/* Save Button */}
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{ mt: 4 }}
+                    onClick={handleSaveAsGuest}
+                >
+                    Save
+                </Button>
+            </Grid>
         </Box>
     );
 };

@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Card, CardContent, IconButton, Grid } from '@mui/material';
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Card,
+    CardContent,
+    IconButton,
+    Grid,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel
+} from '@mui/material';
 import { useSnackbar } from "../Services/SnackbarContext";
 import httpService from "../Services/HttpService";
 
@@ -9,6 +22,15 @@ interface Requirement {
     name: string;
     type: string;
 }
+
+// Define the available requirement types
+const requirementTypes = [
+    "Academic",
+    "Professional",
+    "Technical",
+    "Personal",
+    "Other",
+];
 
 const RequirementsPage: React.FC = () => {
     const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -86,14 +108,20 @@ const RequirementsPage: React.FC = () => {
                                 onChange={(e) => setNewRequirementName(e.target.value)}
                                 sx={{ mb: 2 }}
                             />
-                            <TextField
-                                label="Requirement Type"
-                                variant="outlined"
-                                fullWidth
-                                value={newRequirementType}
-                                onChange={(e) => setNewRequirementType(e.target.value)}
-                                sx={{ mb: 2 }}
-                            />
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <InputLabel id="requirement-type-label">Requirement Type</InputLabel>
+                                <Select
+                                    labelId="requirement-type-label"
+                                    value={newRequirementType}
+                                    onChange={(e) => setNewRequirementType(e.target.value)}
+                                >
+                                    {requirementTypes.map((type) => (
+                                        <MenuItem key={type} value={type}>
+                                            {type}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -111,72 +139,84 @@ const RequirementsPage: React.FC = () => {
                     <Typography variant="h6" gutterBottom>
                         Existing Requirements
                     </Typography>
-                    {requirements.map((requirement) => (
-                        <Card
-                            key={requirement.id}
-                            sx={{
-                                mb: 1, // Reduced margin between cards
-                                maxWidth: 140, // Smaller width for compact size
-                                minWidth: 100, // Adjust minimum width
-                                p: 0.5, // Reduced padding inside the card
-                                position: "relative", // For delete button positioning
-                                border: "1px solid #ddd", // Optional subtle border for compact appearance
-                                boxShadow: 1, // Subtle shadow for better integration
-                                borderRadius: 1, // Small radius for a sleeker design
-                                textAlign: "center",
-                            }}
-                        >
-                            {/* Delete button positioned in the top-right corner */}
-                            <IconButton
-                                color="secondary"
-                                onClick={() => handleDeleteRequirement(requirement.id)}
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", // Up to 3 columns
+                            gap: 2, // Spacing between items
+                            maxHeight: "400px", // Fixed height for scrollable area
+                            overflowY: "auto", // Enable vertical scrolling
+                            border: "1px solid #ddd", // Optional border for container
+                            borderRadius: 1, // Rounded edges
+                            padding: 2, // Inner padding for spacing
+                            backgroundColor: "#f9f9f9", // Subtle background color
+                        }}
+                    >
+                        {requirements.map((requirement) => (
+                            <Box
+                                key={requirement.id}
                                 sx={{
-                                    position: "absolute",
-                                    top: 2, // Closer to the edge for compactness
-                                    right: 2,
-                                    padding: "1px", // Smaller padding for compact size
-                                    fontSize: "14px", // Smaller size for compact look
-                                }}
-                            >
-                                ×
-                            </IconButton>
-
-                            {/* Card content */}
-                            <CardContent
-                                sx={{
-                                    padding: "4px", // Reduced padding for content
-                                    textAlign: "center",
                                     display: "flex",
-                                    flexDirection: "column",
                                     alignItems: "center",
-                                    gap: "2px", // Smaller gap between items
+                                    justifyContent: "space-between",
+                                    padding: 1.5,
+                                    backgroundColor: "#ffffff", // Card background
+                                    boxShadow: "0px 2px 4px rgba(0,0,0,0.1)", // Subtle shadow
+                                    borderRadius: "8px", // Rounded corners
+                                    border: "1px solid #e0e0e0", // Border for a clean look
                                 }}
                             >
-                                <Typography
-                                    variant="body2"
+                                {/* Requirement Details */}
+                                <Box
                                     sx={{
-                                        fontWeight: 600,
-                                        fontSize: "11px", // Further reduced font size
-                                        overflow: "hidden", // Prevent overflow for long names
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        flexGrow: 1, // Allow text to take available space
+                                        overflow: "hidden", // Prevent overflow of long text
                                     }}
                                 >
-                                    {requirement.name}
-                                </Typography>
-                                <Typography
-                                    variant="caption"
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontWeight: 600,
+                                            overflow: "hidden",
+                                            whiteSpace: "nowrap",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {requirement.name}
+                                    </Typography>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: "textSecondary",
+                                            fontSize: "12px",
+                                            overflow: "hidden",
+                                            whiteSpace: "nowrap",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {requirement.type}
+                                    </Typography>
+                                </Box>
+
+                                {/* Delete Button */}
+                                <IconButton
+                                    color="secondary"
+                                    onClick={() => handleDeleteRequirement(requirement.id)}
                                     sx={{
-                                        color: "textSecondary",
-                                        fontSize: "9px", // Reduced caption size
+                                        marginLeft: 1,
+                                        color: "#ff5f5f", // Delete button color
+                                        fontSize: "18px", // Slightly larger icon
                                     }}
                                 >
-                                    {requirement.type}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                    ×
+                                </IconButton>
+                            </Box>
+                        ))}
+                    </Box>
                 </Grid>
+
 
             </Grid>
         </Box>
