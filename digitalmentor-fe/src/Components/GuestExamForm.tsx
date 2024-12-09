@@ -59,6 +59,30 @@ const GuestExamForm: React.FC = () => {
                 }, {} as { [key: number]: number });
 
                 setScores(initialScores);
+
+                const mySkillsResponse = await httpService.get("/api/mySkills");
+                if (mySkillsResponse.data && Array.isArray(mySkillsResponse.data)) {
+                    const mySkills = mySkillsResponse.data;
+
+                    // Define the type for updatedSelectedRequirements
+                    const updatedSelectedRequirements: { id: number; name: string; score: number }[] = [];
+                    const updatedScores = { ...initialScores };
+
+                    mySkills.forEach((skill) => {
+                        updatedScores[skill.requirementId] = skill.score;
+                        const selectedRequirement = requirements.find((req) => req.id === skill.requirementId);
+                        if (selectedRequirement) {
+                            updatedSelectedRequirements.push({
+                                id: selectedRequirement.id,
+                                name: selectedRequirement.name,
+                                score: skill.score,
+                            });
+                        }
+                    });
+
+                    setScores(updatedScores);
+                    setSelectedRequirements(updatedSelectedRequirements);
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -70,26 +94,32 @@ const GuestExamForm: React.FC = () => {
     }, []);
 
     const handleScoreChange = (requirementId: number, score: number) => {
+        // Update scores state
         setScores((prevScores) => ({
             ...prevScores,
-            [requirementId]: score,
+            [requirementId]: score,  // Update score for the specific requirementId
         }));
 
-        // Update selected requirements list
-        const existingIndex = selectedRequirements.findIndex((req) => req.id === requirementId);
-        if (existingIndex !== -1) {
-            const updatedSelected = [...selectedRequirements];
-            updatedSelected[existingIndex].score = score;
-            setSelectedRequirements(updatedSelected);
-        } else {
-            const selected = requirements.find((req) => req.id === requirementId);
-            if (selected) {
-                setSelectedRequirements((prev) => [
-                    ...prev,
-                    { id: selected.id, name: selected.name, score },
-                ]);
+        // Update selectedRequirements state
+        setSelectedRequirements((prevSelectedRequirements) => {
+            const existingIndex = prevSelectedRequirements.findIndex((req) => req.id === requirementId);
+            if (existingIndex !== -1) {
+                // Update score for the existing requirement
+                const updatedSelected = [...prevSelectedRequirements];
+                updatedSelected[existingIndex].score = score;
+                return updatedSelected;
+            } else {
+                // Add the new requirement if it doesn't exist in selectedRequirements
+                const selected = requirements.find((req) => req.id === requirementId);
+                if (selected) {
+                    return [
+                        ...prevSelectedRequirements,
+                        { id: selected.id, name: selected.name, score },  // Add new requirement
+                    ];
+                }
+                return prevSelectedRequirements;  // Return previous state if no match is found
             }
-        }
+        });
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,8 +148,8 @@ const GuestExamForm: React.FC = () => {
 
     const handleSaveAsGuest = async () => {
         const formData = {
-            requirements: selectedRequirements,
-            scores: scores,
+            requirements: selectedRequirements.filter((req) => req.score !== 0),  // Filter out requirements with score 0
+            scores: Object.fromEntries(Object.entries(scores).filter(([key, value]) => value !== 0)), // Only keep non-zero scores
         };
 
         // Generate guestId if not already present
@@ -146,20 +176,21 @@ const GuestExamForm: React.FC = () => {
                 alert("There was an error saving your data as a guest.");
             }
         } else {
-
             try {
                 // Save technical details with userId and guestId
                 const technicalDetails = {
-                    requirements: selectedRequirements.map(req => ({
-                        id: req.id,
-                        score: req.score,
-                    })),
-                    scores: scores,
+                    requirements: selectedRequirements
+                        .filter(req => req.score !== 0)  // Only include non-zero scores
+                        .map(req => ({
+                            id: req.id,
+                            score: req.score,
+                        })),
+                    scores: Object.fromEntries(Object.entries(scores).filter(([key, value]) => value !== 0)), // Only keep non-zero scores
                 };
 
                 if (guestId) {
                     await httpService.post(`/api/saveTechnicalDetails?guestId=${guestId}`, technicalDetails);
-                    LSS.removeItem("guestId")
+                    LSS.removeItem("guestId");
                 } else {
                     await httpService.post(`/api/saveTechnicalDetails`, technicalDetails);
                 }
@@ -170,6 +201,7 @@ const GuestExamForm: React.FC = () => {
             }
         }
     };
+
 
 
     const generateGuestId = () => {
