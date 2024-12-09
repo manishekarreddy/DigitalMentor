@@ -49,6 +49,12 @@ const HeaderPanel = () => {
         authService.logout();
     };
 
+    const handleProfileSettings = () => {
+        handleMenuClose();
+        navigate("/editProfile")
+        // authService.logout();
+    };
+
     const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
         if (
             event.type === 'keydown' &&
@@ -92,6 +98,10 @@ const HeaderPanel = () => {
                             <ListItemButton component={Link} to="/requirements">
                                 <ListItemText primary="Requirements" />
                             </ListItemButton>
+
+                            <ListItemButton component={Link} to="/stats">
+                                <ListItemText primary="Stats" />
+                            </ListItemButton>
                         </List>
                     </Box>
                 </Drawer>
@@ -122,6 +132,7 @@ const HeaderPanel = () => {
                         onClose={handleMenuClose}
                     >
                         <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                        <MenuItem onClick={handleProfileSettings}>Profile Se</MenuItem>
                     </Menu>
                 </Box>
             </Toolbar>

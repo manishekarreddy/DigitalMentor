@@ -3,16 +3,14 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from "./Services/SnackbarContext";
 import Auth from "./Components/Authentication/Auth";
-// import CourseRecommendations from "./Components/misc/Recc";
-// import MySkills from "./Components/misc/Skills";
-// import ProgramRequirementsDashboard from "./Components/misc/ProgramRequirementsDashboard";
-// import ProgramApplicationsView from "./Components/misc/applicants";
 import Dashboard from "./Pages/Dashboard";
 import CreateProgram from "./Components/CreateProgram1";
 import HeaderPanel from "./Pages/HeaderPanel";
 import RequirementsPage from "./Pages/RequirementsPage";
 import LSS from "./Services/LSS";
 import GuestExamForm from "./Components/GuestExamForm";
+import StatsDash from "./Components/StatsDash";
+import EditProfile from "./Pages/EditProfile";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,6 +41,9 @@ function App() {
           <Route path="/create-program/:id?" element={<CreateProgram />} />
           <Route path="/requirements" element={<RequirementsPage />} />
           <Route path="/profileform" element={<GuestExamForm />} />
+          <Route path="/stats" element={<StatsDash />} />
+          <Route path="/editProfile" element={<EditProfile />} />
+
         </Routes>
       </Router>
     </SnackbarProvider>

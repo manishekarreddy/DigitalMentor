@@ -25,6 +25,7 @@ interface Requirement {
 
 // Define the available requirement types
 const requirementTypes = [
+    "Language",
     "Academic",
     "Professional",
     "Technical",
