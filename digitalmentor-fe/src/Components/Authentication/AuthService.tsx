@@ -49,7 +49,7 @@ class AuthService {
             // Send login request
             const response = await httpService.post<AuthResponse>('/login', formData, false);
             console.log("Authentication Response: ", response.data)
-            const { jwt, roles, id, username }: AuthResponse = response.data;
+            const { jwt, roles, id, username, internationalStudent }: AuthResponse = response.data;
 
 
             // Construct user object
@@ -58,7 +58,8 @@ class AuthService {
                 roles: roles,
                 email: formData.email,
                 user_id: id,
-                username: username
+                username: username,
+                internationalStudent: internationalStudent
             };
 
             const hasAdminRole = user.roles.some(role => role.toLowerCase().includes("admin"));

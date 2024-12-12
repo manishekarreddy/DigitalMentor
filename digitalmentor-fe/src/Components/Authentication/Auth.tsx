@@ -4,16 +4,18 @@ import loginIllustration from '../../assets/login_illustration.png';
 import { useState, useCallback } from "react";
 import AuthService from "./AuthService";
 import { useSnackbar } from '../../Services/SnackbarContext';
-
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LSS from "../../Services/LSS";
-
-
 
 const Auth = () => {
   const authService = new AuthService();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const location = useLocation(); // Use useLocation to access query parameters
+
+  // Extract the "redirect" query parameter from the URL
+  const queryParams = new URLSearchParams(location.search);
+  const redirect = queryParams.get("redirect");
 
   // Define mode-related states
   const [mode, setMode] = useState("Login");
@@ -47,29 +49,26 @@ const Auth = () => {
     resetErrors();
   }, [resetErrors]);
 
-
   const continueAsGuest = () => {
-    LSS.removeItem("user")
-    LSS.setItem("mode", "guest")
-    navigate("/dashboard")
-  }
+    LSS.removeItem("user");
+    LSS.setItem("mode", "guest");
+    navigate("/dashboard");
+  };
 
   // Handle form submission
   const handleFormSubmit = useCallback(async () => {
     resetErrors();
 
-    // Ensure that 'name' is defined when in sign-up mode
     const formData = {
       mode,
       email,
       password,
-      ...(mode === "signUp" && { name: name || "" }), // Provide an empty string if name is undefined
+      ...(mode === "signUp" && { name: name || "" }),
     };
 
     // Validate form data
     const resp: Record<string, any> = authService.validateForm(mode, formData);
 
-    // Handle validation errors for signup
     if (mode === "signUp") {
       if (resp.nameErr) {
         setNameError(true);
@@ -86,9 +85,7 @@ const Auth = () => {
         showSnackbar(resp.passErr, 'error');
       }
 
-      // Proceed if no errors
       if (!resp.nameErr && !resp.emailErr && !resp.passErr) {
-        // Ensure formData.name is defined when calling register
         const response: Record<string, any> = await authService.register({
           name: name!,
           email,
@@ -96,36 +93,39 @@ const Auth = () => {
         });
         if (response.success) {
           showSnackbar(response.message, 'success');
-          swapModes(); // Switch to login mode after successful signup
+          swapModes();
         } else {
           showSnackbar(response.message, 'error');
         }
       }
     } else if (mode === "Login") {
       try {
-        // Await the promise returned by the login method
         const loginResp = await authService.login(formData);
-        console.log(loginResp);
-
         if (loginResp.success) {
           showSnackbar(loginResp.message, 'success');
-          navigate("/dashboard")
+
+          // If there is a redirect URL, navigate to it
+          if (redirect) {
+            let r = "/" + redirect
+            navigate(r); // Redirect to the value of the "redirect" query parameter
+          } else {
+            navigate("/dashboard");
+          }
         } else {
           showSnackbar(loginResp.message, 'error');
-          setEmailError(true); // Set error state for email
-          setPasswordError(true); // Set error state for password
+          setEmailError(true);
+          setPasswordError(true);
         }
       } catch (error) {
         console.error("Error during login:", error);
         showSnackbar("An unexpected error occurred during login.", 'error');
       }
     }
-  }, [email, password, name, mode, authService, showSnackbar, resetErrors]);
-
+  }, [email, password, name, mode, authService, showSnackbar, resetErrors, redirect, navigate]);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleFormSubmit(); // Trigger form submission
+      handleFormSubmit();
     }
   };
 
@@ -193,7 +193,7 @@ const Auth = () => {
                 margin="normal"
                 fullWidth
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={handleKeyDown} // Trigger form submission on Enter
+                onKeyDown={handleKeyDown}
               />
 
               <TextField
@@ -204,7 +204,7 @@ const Auth = () => {
                 margin="normal"
                 fullWidth
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown} // Trigger form submission on Enter
+                onKeyDown={handleKeyDown}
               />
 
               <Button
@@ -212,7 +212,7 @@ const Auth = () => {
                 color="primary"
                 fullWidth
                 style={{ marginTop: "16px" }}
-                onClick={handleFormSubmit} // Submit on button click
+                onClick={handleFormSubmit}
               >
                 {submitBtnText}
               </Button>
@@ -222,20 +222,19 @@ const Auth = () => {
                 color="secondary"
                 fullWidth
                 style={{ marginTop: "25px" }}
-                onClick={swapModes} // Swap modes on button click
+                onClick={swapModes}
               >
                 {switchModesText}
               </Button>
-
 
               <Button
                 id="swapMethodBtn"
                 color="secondary"
                 fullWidth
                 style={{ marginTop: "25px" }}
-                onClick={continueAsGuest} // Swap modes on button click
+                onClick={continueAsGuest}
               >
-                Continue as Guest ?
+                Continue as Guest?
               </Button>
             </CardContent>
           </Grid>
@@ -243,6 +242,6 @@ const Auth = () => {
       </Card>
     </Container>
   );
-}
+};
 
 export default Auth;

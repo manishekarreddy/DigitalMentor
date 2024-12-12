@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
                 .cors(c -> c.configurationSource(corsConfigurationSource())) // Enable CORS
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("*").permitAll()
-                        .requestMatchers("/login", "/register", "/api/programs/**", "/api/requirements/**", "/api/evaluate/**").permitAll() // Allow access to /register and /login
+                        .requestMatchers("/login", "/register", "/api/programs/**", "/api/requirements/**", "/api/evaluate/**", "/api/**").permitAll() // Allow access to /register and /login
                         .anyRequest().authenticated() // Other requests need authentication
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session

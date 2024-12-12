@@ -4,6 +4,7 @@ export interface AuthResponse {
   id: BigInteger;
   roles: [string];
   username: string;
+  internationalStudent: boolean;
 }
 
 export interface LoginFormData {
