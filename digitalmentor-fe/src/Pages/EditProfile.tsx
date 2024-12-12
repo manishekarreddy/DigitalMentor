@@ -39,7 +39,6 @@ const EditProfile: React.FC = () => {
             const { international, email, username } = profile;
             const query = `?international=${international === 'true'}`;
             await httpService.put(`/api/users/edit${query}`, { email, username });
-            alert('Profile updated successfully!');
         } catch (err: any) {
             setError(err.message || 'Failed to update profile.');
         }

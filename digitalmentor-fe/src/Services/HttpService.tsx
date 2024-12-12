@@ -7,7 +7,7 @@ class HttpService {
     // Create an Axios instance with default config
     private axiosInstance = axios.create({
         baseURL: BASE_URL,
-        timeout: 10000, // Timeout after 10 seconds
+        timeout: 1000000,
         headers: {
             'Content-Type': 'application/json',
         },

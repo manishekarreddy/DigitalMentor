@@ -7,6 +7,10 @@ import {
     TextField,
     CircularProgress,
     Paper,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle
 } from "@mui/material";
 // import { useNavigate } from "react-router-dom";
 import httpService from "../Services/HttpService";
@@ -34,6 +38,8 @@ const GuestExamForm: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [programs, setPrograms] = useState<InitialProgram[]>([]);
     const [evaluationResults, setEvaluationResults] = useState<ProgramEvaluation[]>([]);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [recommendations, setRecommendations] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -144,7 +150,6 @@ const GuestExamForm: React.FC = () => {
             setEvaluationResults(updatedEvaluationResults);
         } catch (error) {
             console.error("Error submitting exam data:", error);
-            alert("There was an error submitting the exam details.");
         } finally {
             setIsSubmitting(false);
         }
@@ -177,7 +182,6 @@ const GuestExamForm: React.FC = () => {
                 window.location.href = "/login?redirect=profileform";
             } catch (error) {
                 console.error("Error saving data as guest:", error);
-                alert("There was an error saving your data as a guest.");
             }
         } else {
             try {
@@ -202,9 +206,27 @@ const GuestExamForm: React.FC = () => {
 
             } catch (error) {
                 console.error("Error saving details for logged-in user:", error);
-                alert("There was an error saving your details.");
             }
         }
+    };
+
+
+    const handleClickReocmmendations = async (programId: number) => {
+        const userObj = LSS.getItem("user");
+        if (programId) {
+
+            try {
+                const response: any = await httpService.get(`/api/users/recommendations/${programId}`);
+                setRecommendations(response.data.recommendations);
+                setOpenDialog(true);  // Open the dialog after data is fetched
+            } catch (error) {
+                console.error("Error fetching recommendations:", error);
+            }
+        }
+    }
+
+    const closePopup = () => {
+        setOpenDialog(false);
     };
 
 
@@ -233,6 +255,8 @@ const GuestExamForm: React.FC = () => {
             </Box>
         );
     }
+
+
 
     return (
         <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
@@ -373,6 +397,9 @@ const GuestExamForm: React.FC = () => {
                                         borderRadius: 1,
                                         backgroundColor: "#fff",
                                     }}
+                                    onClick={() => handleClickReocmmendations(program.id)}
+
+
                                 >
                                     <Typography variant="h6">{program.name}</Typography>
                                     {evaluationResults
@@ -397,6 +424,36 @@ const GuestExamForm: React.FC = () => {
                     </Box>
                 </Grid>
             </Grid>
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Improvement Recommendations</DialogTitle>
+                <DialogContent>
+                    {recommendations.length > 0 ? (
+                        <div>
+                            {recommendations.map((recommendation, index) => (
+                                <Box key={index} sx={{ mb: 2 }}>
+                                    <Typography variant="body1" fontWeight="bold">
+                                        {recommendation.requirementName}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        Improvement Needed: {recommendation.improvementNeeded}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        Max Possible Score: {recommendation.maxPossibleScore}
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </div>
+                    ) : (
+                        <Typography>No recommendations available.</Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Grid>
                 <Button
