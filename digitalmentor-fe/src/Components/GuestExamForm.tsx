@@ -261,7 +261,7 @@ const GuestExamForm: React.FC = () => {
     return (
         <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
             <Typography variant="h4" gutterBottom>
-                Guest Exam Details
+                My Skills Details
             </Typography>
             <Typography variant="body1" gutterBottom>
                 Please fill in the required details for each exam requirement.
@@ -397,9 +397,6 @@ const GuestExamForm: React.FC = () => {
                                         borderRadius: 1,
                                         backgroundColor: "#fff",
                                     }}
-                                    onClick={() => handleClickReocmmendations(program.id)}
-
-
                                 >
                                     <Typography variant="h6">{program.name}</Typography>
                                     {evaluationResults
@@ -414,6 +411,16 @@ const GuestExamForm: React.FC = () => {
                                                 </Typography>
                                             </Box>
                                         ))}
+                                    {/* Add the "What to Improve" button */}
+                                    <p>Login to Check how you can Improve</p>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        sx={{ mt: 2 }}
+                                        onClick={() => handleClickReocmmendations(program.id)}
+                                    >
+                                        How to Improve ?
+                                    </Button>
                                 </Box>
                             ))
                         ) : (
@@ -423,6 +430,7 @@ const GuestExamForm: React.FC = () => {
                         )}
                     </Box>
                 </Grid>
+
             </Grid>
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>

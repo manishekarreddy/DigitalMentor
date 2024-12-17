@@ -72,7 +72,7 @@ const ProgramsList: React.FC = () => {
                     sx={{ mb: 3 }}
                     onClick={handleCreateProfile}
                 >
-                    Create Profile
+                    My Profile
                 </Button>
             )}
 
