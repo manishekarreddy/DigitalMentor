@@ -38,7 +38,7 @@ const StatsChart: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/admin/dashboard/skills');
+                const response = await fetch('http://34.121.92.80:8080/admin/dashboard/skills');
                 const result = await response.json();
                 setData(result);  // Update state with the fetched data
             } catch (error) {
