@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import LSS from './LSS';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'http://34.121.92.80:8080';
 
 class HttpService {
     // Create an Axios instance with default config
